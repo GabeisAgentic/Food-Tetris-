@@ -24,7 +24,7 @@ GAME_BG = (255, 255, 255)  # White background for game area
 
 # Food-themed Tetrominoes
 FOODS = {
-    'burger': {  # I shape
+    'fries': {  # I shape - Classic long piece styled as french fries
         'shape': [
             ['.....',
              '.....',
@@ -47,9 +47,9 @@ FOODS = {
              '..X..',
              '.....']
         ],
-        'color': (255, 165, 0)  # Orange
+        'color': (255, 215, 0)  # Golden yellow for fries
     },
-    'pizza': {  # O shape
+    'cheeseburger': {  # O shape - Classic square piece styled as cheeseburger
         'shape': [
             ['.....',
              '.....',
@@ -72,34 +72,34 @@ FOODS = {
              '.XX..',
              '.....']
         ],
-        'color': (255, 0, 0)  # Red
+        'color': (139, 69, 19)  # Brown for burger bun
     },
-    'fries': {  # T shape
+    'chicken': {  # T shape - Classic T piece styled as chicken nuggets
         'shape': [
             ['.....',
              '..X..',
              '.XXX.',
              '.....',
+             '.....'],
+            ['.....',
+             '..X..',
+             '.XX..',
+             '..X..',
+             '.....'],
+            ['.....',
+             '.....',
+             '.XXX.',
+             '..X..',
              '.....'],
             ['.....',
              '..X..',
              '..XX.',
              '..X..',
-             '.....'],
-            ['.....',
-             '.....',
-             '.XXX.',
-             '..X..',
-             '.....'],
-            ['.....',
-             '..X..',
-             '.XX..',
-             '..X..',
              '.....']
         ],
-        'color': (255, 255, 0)  # Yellow
+        'color': (210, 180, 140)  # Tan color for chicken
     },
-    'sushi': {  # L shape
+    'banana': {  # L shape - Classic L piece styled as banana
         'shape': [
             ['.....',
              '...X.',
@@ -107,9 +107,9 @@ FOODS = {
              '.....',
              '.....'],
             ['.....',
+             '.XX..',
              '..X..',
              '..X..',
-             '..XX.',
              '.....'],
             ['.....',
              '.....',
@@ -117,14 +117,14 @@ FOODS = {
              '.X...',
              '.....'],
             ['.....',
-             '.XX..',
              '..X..',
              '..X..',
+             '..XX.',
              '.....']
         ],
-        'color': (0, 255, 0)  # Green
+        'color': (255, 223, 0)  # Yellow for banana
     },
-    'donut': {  # J shape
+    'carrot': {  # J shape - Classic J piece styled as carrot
         'shape': [
             ['.....',
              '.X...',
@@ -132,9 +132,9 @@ FOODS = {
              '.....',
              '.....'],
             ['.....',
+             '..X..',
+             '..X..',
              '.XX..',
-             '.X...',
-             '.X...',
              '.....'],
             ['.....',
              '.....',
@@ -142,14 +142,14 @@ FOODS = {
              '...X.',
              '.....'],
             ['.....',
-             '..X..',
-             '..X..',
              '.XX..',
+             '.X...',
+             '.X...',
              '.....']
         ],
-        'color': (255, 192, 203)  # Pink
+        'color': (255, 140, 0)  # Orange for carrot
     },
-    'hotdog': {  # S shape
+    'pretzel': {  # S shape - Classic S piece styled as pretzel
         'shape': [
             ['.....',
              '.....',
@@ -172,9 +172,9 @@ FOODS = {
              '..X..',
              '.....']
         ],
-        'color': (139, 69, 19)  # Brown
+        'color': (139, 69, 19)  # Brown for pretzel
     },
-    'broccoli': {  # Z shape
+    'pasta': {  # Z shape - Classic Z piece styled as twisted pasta
         'shape': [
             ['.....',
              '.....',
@@ -197,12 +197,12 @@ FOODS = {
              '.X...',
              '.....']
         ],
-        'color': (34, 139, 34)  # Forest Green
+        'color': (255, 248, 220)  # Cream color for pasta
     }
 }
 
-def create_food_image(color):
-    """Create a colored surface for a food piece"""
+def create_food_image(color, label):
+    """Create a colored surface for a food piece with label"""
     surface = pygame.Surface((GRID_SIZE, GRID_SIZE))
     surface.fill(color)
     # Add a semi-transparent overlay to make it look more like food
@@ -211,6 +211,13 @@ def create_food_image(color):
     surface.blit(overlay, (0, 0))
     # Add a border
     pygame.draw.rect(surface, (255, 255, 255), surface.get_rect(), 1)
+    
+    # Add text label
+    font = pygame.font.Font(None, 20)
+    text = font.render(label, True, (0, 0, 0))
+    text_rect = text.get_rect(center=(GRID_SIZE//2, GRID_SIZE//2))
+    surface.blit(text, text_rect)
+    
     return surface
 
 def process_food_image(image):
@@ -228,6 +235,16 @@ def process_food_image(image):
 def load_food_images():
     """Load food images or create placeholders if images are not found"""
     food_images = {}
+    food_labels = {
+        'fries': 'Fries',
+        'cheeseburger': 'Burger',
+        'chicken': 'Chicken',
+        'banana': 'Banana',
+        'carrot': 'Carrot',
+        'pretzel': 'Pretzel',
+        'pasta': 'Pasta'
+    }
+    
     for food_name in FOODS.keys():
         try:
             # Try to load the actual food image
@@ -236,11 +253,11 @@ def load_food_images():
                 image = pygame.image.load(image_path).convert_alpha()
                 food_images[food_name] = process_food_image(image)
             else:
-                # Create a placeholder if image is not found
-                food_images[food_name] = create_food_image(FOODS[food_name]['color'])
+                # Create a placeholder with label if image is not found
+                food_images[food_name] = create_food_image(FOODS[food_name]['color'], food_labels[food_name])
         except:
             # Fallback to placeholder if loading fails
-            food_images[food_name] = create_food_image(FOODS[food_name]['color'])
+            food_images[food_name] = create_food_image(FOODS[food_name]['color'], food_labels[food_name])
     return food_images
 
 def new_piece():
@@ -273,32 +290,9 @@ def new_piece():
         }]
     return current_piece
 
-def flip_piece(piece):
-    """Flip the piece horizontally"""
-    shape = FOODS[piece['type']]['shape'][piece['rotation']]
-    # Create a new flipped shape
-    flipped_shape = []
-    for row in shape:
-        # Reverse each row to flip horizontally
-        flipped_row = row[::-1]
-        flipped_shape.append(flipped_row)
-    
-    # Find the new position to keep the piece centered
-    old_width = len(shape[0])
-    new_width = len(flipped_shape[0])
-    x_offset = (old_width - new_width) // 2
-    
-    return {
-        'type': piece['type'],
-        'x': piece['x'] + x_offset,
-        'y': piece['y'],
-        'rotation': piece['rotation'],
-        'flipped_shape': flipped_shape
-    }
-
-def valid_move(piece, x, y, rotation, grid, flipped_shape=None):
+def valid_move(piece, x, y, rotation, grid):
     """Check if a move is valid"""
-    shape = flipped_shape if flipped_shape else FOODS[piece['type']]['shape'][rotation]
+    shape = FOODS[piece['type']]['shape'][rotation]
     for i, row in enumerate(shape):
         for j, cell in enumerate(row):
             if cell == 'X':
@@ -310,9 +304,9 @@ def valid_move(piece, x, y, rotation, grid, flipped_shape=None):
                     return False
     return True
 
-def merge_piece(piece, flipped_shape=None):
+def merge_piece(piece):
     """Merge the current piece with the grid"""
-    shape = flipped_shape if flipped_shape else FOODS[piece['type']]['shape'][piece['rotation']]
+    shape = FOODS[piece['type']]['shape'][piece['rotation']]
     for i, row in enumerate(shape):
         for j, cell in enumerate(row):
             if cell == 'X':
@@ -347,9 +341,9 @@ def draw_grid():
                 screen.blit(food_images[grid[y][x]],
                           (x * GRID_SIZE, y * GRID_SIZE))
 
-def draw_piece(piece, ghost=False, flipped_shape=None):
+def draw_piece(piece, ghost=False):
     """Draw a piece on the screen"""
-    shape = flipped_shape if flipped_shape else FOODS[piece['type']]['shape'][piece['rotation']]
+    shape = FOODS[piece['type']]['shape'][piece['rotation']]
     for i, row in enumerate(shape):
         for j, cell in enumerate(row):
             if cell == 'X':
@@ -420,15 +414,20 @@ def draw_sidebar():
     
     if next_pieces:
         for i, next_piece in enumerate(next_pieces):
-            next_shape = FOODS[next_piece['type']]['shape'][0]
-            # Calculate the center position for each piece
-            piece_width = len(next_shape[0]) * GRID_SIZE
-            piece_height = len(next_shape) * GRID_SIZE
+            # Create a copy of the piece for preview
+            preview_piece = next_piece.copy()
+            
+            # Get the shape for the current rotation
+            shape = FOODS[preview_piece['type']]['shape'][preview_piece['rotation']]
+            
+            # Calculate the dimensions of the shape
+            shape_width = len(shape[0]) * GRID_SIZE
+            shape_height = len(shape) * GRID_SIZE
             
             # Calculate preview box dimensions with padding
             box_padding = 10
-            box_width = piece_width + (box_padding * 2)
-            box_height = piece_height + (box_padding * 2)
+            box_width = max(shape_width, GRID_SIZE * 4) + (box_padding * 2)  # Ensure minimum width
+            box_height = max(shape_height, GRID_SIZE * 4) + (box_padding * 2)  # Ensure minimum height
             
             # Calculate box position
             box_x = GRID_WIDTH * GRID_SIZE + (SIDEBAR_WIDTH - box_width) // 2
@@ -438,20 +437,17 @@ def draw_sidebar():
             pygame.draw.rect(screen, (40, 40, 40), (box_x, box_y, box_width, box_height))
             pygame.draw.rect(screen, WHITE, (box_x, box_y, box_width, box_height), 1)
             
-            # Calculate piece position within the box
-            start_x = box_x + box_padding
-            start_y = box_y + box_padding
+            # Calculate piece position within the box (centered)
+            start_x = box_x + (box_width - shape_width) // 2
+            start_y = box_y + (box_height - shape_height) // 2
             
             # Draw the piece
-            for row_idx, row in enumerate(next_shape):
+            for row_idx, row in enumerate(shape):
                 for col_idx, cell in enumerate(row):
                     if cell == 'X':
                         x = start_x + col_idx * GRID_SIZE
                         y = start_y + row_idx * GRID_SIZE
-                        # Draw a slightly larger version of the piece
-                        scaled_image = pygame.transform.scale(food_images[next_piece['type']], 
-                                                           (GRID_SIZE, GRID_SIZE))
-                        screen.blit(scaled_image, (x, y))
+                        screen.blit(food_images[preview_piece['type']], (x, y))
 
 def draw_game_over():
     """Draw the game over screen"""
@@ -517,26 +513,33 @@ def draw_controls():
 
 def try_wall_kick(piece, new_rotation, grid):
     """Try to move the piece left or right to make rotation possible"""
+    # Store original position
+    original_x = piece['x']
+    original_y = piece['y']
+    original_rotation = piece['rotation']
+    
     # Try moving left
     if valid_move(piece, piece['x'] - 1, piece['y'], new_rotation, grid):
         piece['x'] -= 1
         piece['rotation'] = new_rotation
         return True
+    
     # Try moving right
     if valid_move(piece, piece['x'] + 1, piece['y'], new_rotation, grid):
         piece['x'] += 1
         piece['rotation'] = new_rotation
         return True
-    # Try moving left twice
-    if valid_move(piece, piece['x'] - 2, piece['y'], new_rotation, grid):
-        piece['x'] -= 2
+    
+    # Try moving up (for pieces near the bottom)
+    if valid_move(piece, piece['x'], piece['y'] - 1, new_rotation, grid):
+        piece['y'] -= 1
         piece['rotation'] = new_rotation
         return True
-    # Try moving right twice
-    if valid_move(piece, piece['x'] + 2, piece['y'], new_rotation, grid):
-        piece['x'] += 2
-        piece['rotation'] = new_rotation
-        return True
+    
+    # If no valid wall kick found, restore original position
+    piece['x'] = original_x
+    piece['y'] = original_y
+    piece['rotation'] = original_rotation
     return False
 
 def main():
@@ -582,10 +585,6 @@ def main():
     move_delay = 16  # milliseconds between moves when holding down (about 60 moves per second)
     horizontal_move_delay = 100  # milliseconds between horizontal moves (about 10 moves per second)
     
-    # Track if piece is flipped
-    is_flipped = False
-    flipped_shape = None
-    
     # Main game loop
     while True:
         # Handle events
@@ -618,32 +617,33 @@ def main():
                     level = 1
                     lines_cleared = 0
                     game_over = False
-                    is_flipped = False
-                    flipped_shape = None
                 
                 if not paused and not game_over:
                     if event.key == pygame.K_UP:
+                        # Store original state
+                        original_rotation = current_piece['rotation']
+                        original_x = current_piece['x']
+                        original_y = current_piece['y']
+                        
+                        # Try rotation
                         new_rotation = (current_piece['rotation'] + 1) % 4
-                        if valid_move(current_piece, current_piece['x'], current_piece['y'], new_rotation, grid, flipped_shape):
+                        if valid_move(current_piece, current_piece['x'], current_piece['y'], new_rotation, grid):
                             current_piece['rotation'] = new_rotation
                         else:
                             # Try wall kicks if direct rotation isn't possible
-                            try_wall_kick(current_piece, new_rotation, grid)
-                    elif event.key == pygame.K_z:
-                        # Flip the piece
-                        flipped = flip_piece(current_piece)
-                        if valid_move(flipped, flipped['x'], flipped['y'], flipped['rotation'], grid, flipped['flipped_shape']):
-                            current_piece = flipped
-                            is_flipped = True
-                            flipped_shape = flipped['flipped_shape']
+                            if try_wall_kick(current_piece, new_rotation, grid):
+                                pass
+                            else:
+                                # If no valid rotation found, restore original state
+                                current_piece['rotation'] = original_rotation
+                                current_piece['x'] = original_x
+                                current_piece['y'] = original_y
                     elif event.key == pygame.K_SPACE:
-                        while valid_move(current_piece, current_piece['x'], current_piece['y'] + 1, current_piece['rotation'], grid, flipped_shape):
+                        while valid_move(current_piece, current_piece['x'], current_piece['y'] + 1, current_piece['rotation'], grid):
                             current_piece['y'] += 1
-                        merge_piece(current_piece, flipped_shape)
+                        merge_piece(current_piece)
                         clear_lines()
                         current_piece = new_piece()
-                        is_flipped = False
-                        flipped_shape = None
                         if not valid_move(current_piece, current_piece['x'], current_piece['y'], current_piece['rotation'], grid):
                             game_over = True
         
@@ -654,32 +654,30 @@ def main():
             
             # Handle left movement
             if keys[pygame.K_LEFT] and current_time - last_horizontal_move_time > horizontal_move_delay:
-                if valid_move(current_piece, current_piece['x'] - 1, current_piece['y'], current_piece['rotation'], grid, flipped_shape):
+                if valid_move(current_piece, current_piece['x'] - 1, current_piece['y'], current_piece['rotation'], grid):
                     current_piece['x'] -= 1
                     last_horizontal_move_time = current_time
             
             # Handle right movement
             if keys[pygame.K_RIGHT] and current_time - last_horizontal_move_time > horizontal_move_delay:
-                if valid_move(current_piece, current_piece['x'] + 1, current_piece['y'], current_piece['rotation'], grid, flipped_shape):
+                if valid_move(current_piece, current_piece['x'] + 1, current_piece['y'], current_piece['rotation'], grid):
                     current_piece['x'] += 1
                     last_horizontal_move_time = current_time
             
             # Handle down movement
             if keys[pygame.K_DOWN] and current_time - last_move_time > move_delay:
-                if valid_move(current_piece, current_piece['x'], current_piece['y'] + 1, current_piece['rotation'], grid, flipped_shape):
+                if valid_move(current_piece, current_piece['x'], current_piece['y'] + 1, current_piece['rotation'], grid):
                     current_piece['y'] += 1
                     last_move_time = current_time
             elif not keys[pygame.K_DOWN]:
                 # Move piece down automatically
                 if current_time - last_move_time > 1000:  # 1 second between automatic falls
-                    if valid_move(current_piece, current_piece['x'], current_piece['y'] + 1, current_piece['rotation'], grid, flipped_shape):
+                    if valid_move(current_piece, current_piece['x'], current_piece['y'] + 1, current_piece['rotation'], grid):
                         current_piece['y'] += 1
                     else:
-                        merge_piece(current_piece, flipped_shape)
+                        merge_piece(current_piece)
                         clear_lines()
                         current_piece = new_piece()
-                        is_flipped = False
-                        flipped_shape = None
                         if not valid_move(current_piece, current_piece['x'], current_piece['y'], current_piece['rotation'], grid):
                             game_over = True
                     last_move_time = current_time
@@ -689,7 +687,7 @@ def main():
         draw_grid()
         if not game_over and not paused:
             draw_ghost_piece(current_piece)
-            draw_piece(current_piece, flipped_shape=flipped_shape)
+            draw_piece(current_piece)
         draw_sidebar()
         
         if paused:
