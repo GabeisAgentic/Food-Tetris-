@@ -203,20 +203,46 @@ FOODS = {
 
 def create_food_image(color, label):
     """Create a colored surface for a food piece with label"""
+    # Create a surface for the food piece
     surface = pygame.Surface((GRID_SIZE, GRID_SIZE))
-    surface.fill(color)
-    # Add a semi-transparent overlay to make it look more like food
-    overlay = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
-    overlay.fill((255, 255, 255, 50))
-    surface.blit(overlay, (0, 0))
-    # Add a border
-    pygame.draw.rect(surface, (255, 255, 255), surface.get_rect(), 1)
     
-    # Add text label
-    font = pygame.font.Font(None, 20)
-    text = font.render(label, True, (0, 0, 0))
-    text_rect = text.get_rect(center=(GRID_SIZE//2, GRID_SIZE//2))
+    # Try to load the image first
+    image_paths = [
+        os.path.join('images', f'{label.lower()}.png .webp'),  # Try the exact file name we found
+        os.path.join('images', f'{label.lower()}.png'),        # Try .png
+        os.path.join('images', f'{label.lower()}.webp')        # Try .webp
+    ]
+    
+    for image_path in image_paths:
+        print(f"Trying to load image from: {image_path}")  # Debug print
+        print(f"Does file exist? {os.path.exists(image_path)}")  # Debug print
+        try:
+            if os.path.exists(image_path):
+                print(f"Loading image for {label} from {image_path}")  # Debug print
+                # Load and scale the image
+                food_image = pygame.image.load(image_path)
+                food_image = pygame.transform.scale(food_image, (GRID_SIZE, GRID_SIZE))
+                # Add a white border to the image
+                pygame.draw.rect(food_image, (255, 255, 255), food_image.get_rect(), 1)
+                return food_image
+        except Exception as e:
+            print(f"Error loading image {image_path}: {str(e)}")  # Debug print
+            continue
+    
+    print(f"Falling back to colored block for {label}")  # Debug print
+    
+    # Fill with the base color
+    pygame.draw.rect(surface, color, (0, 0, GRID_SIZE, GRID_SIZE))
+    
+    # Add a letter label as fallback
+    font = pygame.font.Font(None, GRID_SIZE // 2)
+    letter = label[0].upper()
+    text = font.render(letter, True, (0, 0, 0))
+    text_rect = text.get_rect(center=(GRID_SIZE // 2, GRID_SIZE // 2))
     surface.blit(text, text_rect)
+    
+    # Add a white border
+    pygame.draw.rect(surface, (255, 255, 255), surface.get_rect(), 1)
     
     return surface
 
@@ -233,31 +259,21 @@ def process_food_image(image):
     return image
 
 def load_food_images():
-    """Load food images or create placeholders if images are not found"""
+    """Load food images or create emoji-based food pieces"""
     food_images = {}
     food_labels = {
-        'fries': 'Fries',
-        'cheeseburger': 'Burger',
-        'chicken': 'Chicken',
-        'banana': 'Banana',
-        'carrot': 'Carrot',
-        'pretzel': 'Pretzel',
-        'pasta': 'Pasta'
+        'fries': 'fries',
+        'cheeseburger': 'burger',
+        'chicken': 'chicken',
+        'banana': 'banana',
+        'carrot': 'carrot',
+        'pretzel': 'pretzel',
+        'pasta': 'pasta'
     }
     
     for food_name in FOODS.keys():
-        try:
-            # Try to load the actual food image
-            image_path = os.path.join('images', f'{food_name}.png')
-            if os.path.exists(image_path):
-                image = pygame.image.load(image_path).convert_alpha()
-                food_images[food_name] = process_food_image(image)
-            else:
-                # Create a placeholder with label if image is not found
-                food_images[food_name] = create_food_image(FOODS[food_name]['color'], food_labels[food_name])
-        except:
-            # Fallback to placeholder if loading fails
-            food_images[food_name] = create_food_image(FOODS[food_name]['color'], food_labels[food_name])
+        food_images[food_name] = create_food_image(FOODS[food_name]['color'], food_labels[food_name])
+    
     return food_images
 
 def new_piece():
@@ -338,29 +354,36 @@ def draw_grid():
             pygame.draw.rect(screen, GRID_COLOR,
                            (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
             if grid[y][x]:
-                screen.blit(food_images[grid[y][x]],
-                          (x * GRID_SIZE, y * GRID_SIZE))
+                # Draw individual food block
+                food_type = grid[y][x]
+                food_image = food_images[food_type]
+                # Scale down the food image to fit a single block
+                scaled_image = pygame.transform.scale(food_image, (GRID_SIZE, GRID_SIZE))
+                screen.blit(scaled_image, (x * GRID_SIZE, y * GRID_SIZE))
 
 def draw_piece(piece, ghost=False):
     """Draw a piece on the screen"""
     shape = FOODS[piece['type']]['shape'][piece['rotation']]
+    
+    # Draw individual blocks for the piece
     for i, row in enumerate(shape):
         for j, cell in enumerate(row):
             if cell == 'X':
-                x = (piece['x'] + j) * GRID_SIZE
-                y = (piece['y'] + i) * GRID_SIZE
+                # Draw individual food block
+                food_image = food_images[piece['type']]
+                # Scale down the food image to fit a single block
+                scaled_image = pygame.transform.scale(food_image, (GRID_SIZE, GRID_SIZE))
+                
                 if ghost:
-                    # Create a darker ghost version of the food image
-                    ghost_surface = food_images[piece['type']].copy()
-                    # Make the ghost piece darker by using a lower alpha value
-                    ghost_surface.set_alpha(80)  # Changed from 128 to 80 for darker shadow
-                    # Add a dark overlay to make it even more visible
+                    # Create a darker ghost version of just this block
+                    ghost_surface = scaled_image.copy()
+                    ghost_surface.set_alpha(80)
                     dark_overlay = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
-                    dark_overlay.fill((0, 0, 0, 100))  # Semi-transparent black overlay
+                    dark_overlay.fill((0, 0, 0, 100))
                     ghost_surface.blit(dark_overlay, (0, 0))
-                    screen.blit(ghost_surface, (x, y))
+                    screen.blit(ghost_surface, ((piece['x'] + j) * GRID_SIZE, (piece['y'] + i) * GRID_SIZE))
                 else:
-                    screen.blit(food_images[piece['type']], (x, y))
+                    screen.blit(scaled_image, ((piece['x'] + j) * GRID_SIZE, (piece['y'] + i) * GRID_SIZE))
 
 def draw_ghost_piece(piece):
     """Draw the ghost piece showing where the current piece will land"""
@@ -424,30 +447,19 @@ def draw_sidebar():
             shape_width = len(shape[0]) * GRID_SIZE
             shape_height = len(shape) * GRID_SIZE
             
-            # Calculate preview box dimensions with padding
-            box_padding = 10
-            box_width = max(shape_width, GRID_SIZE * 4) + (box_padding * 2)  # Ensure minimum width
-            box_height = max(shape_height, GRID_SIZE * 4) + (box_padding * 2)  # Ensure minimum height
+            # Calculate piece position (centered in sidebar)
+            start_x = GRID_WIDTH * GRID_SIZE + (SIDEBAR_WIDTH - shape_width) // 2
+            start_y = 240 + (i * 140)
             
-            # Calculate box position
-            box_x = GRID_WIDTH * GRID_SIZE + (SIDEBAR_WIDTH - box_width) // 2
-            box_y = 240 + (i * 140)  # Increased spacing between pieces
-            
-            # Draw preview box background
-            pygame.draw.rect(screen, (40, 40, 40), (box_x, box_y, box_width, box_height))
-            pygame.draw.rect(screen, WHITE, (box_x, box_y, box_width, box_height), 1)
-            
-            # Calculate piece position within the box (centered)
-            start_x = box_x + (box_width - shape_width) // 2
-            start_y = box_y + (box_height - shape_height) // 2
-            
-            # Draw the piece
+            # Draw individual blocks for the preview piece
             for row_idx, row in enumerate(shape):
                 for col_idx, cell in enumerate(row):
                     if cell == 'X':
-                        x = start_x + col_idx * GRID_SIZE
-                        y = start_y + row_idx * GRID_SIZE
-                        screen.blit(food_images[preview_piece['type']], (x, y))
+                        # Draw individual food block
+                        food_image = food_images[preview_piece['type']]
+                        # Scale down the food image to fit a single block
+                        scaled_image = pygame.transform.scale(food_image, (GRID_SIZE, GRID_SIZE))
+                        screen.blit(scaled_image, (start_x + col_idx * GRID_SIZE, start_y + row_idx * GRID_SIZE))
 
 def draw_game_over():
     """Draw the game over screen"""
