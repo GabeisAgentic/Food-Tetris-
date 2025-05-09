@@ -314,9 +314,9 @@ def valid_move(piece, x, y, rotation, grid):
             if cell == 'X':
                 new_x = x + j
                 new_y = y + i
-                if (new_x < 0 or new_x >= GRID_WIDTH or 
-                    new_y >= GRID_HEIGHT or 
-                    (new_y >= 0 and grid[new_y][new_x])):
+                if new_x < 0 or new_x >= GRID_WIDTH or new_y < 0 or new_y >= GRID_HEIGHT:
+                    return False
+                if grid[new_y][new_x]:
                     return False
     return True
 
