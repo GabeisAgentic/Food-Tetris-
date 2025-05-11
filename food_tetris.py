@@ -3,6 +3,7 @@ import random
 import os
 import sys
 import traceback
+import time
 
 # Initialize Pygame
 pygame.init()
@@ -201,6 +202,15 @@ FOODS = {
     }
 }
 
+# Character fullness and explosion state
+character_fullness = 0
+character_max_fullness = 11 * 60  # 11 minutes in seconds (can be adjusted)
+character_exploded = False
+character_last_eat_time = 0
+character_eat_animation_time = 0.5  # seconds
+character_eating = False
+character_start_time = time.time()
+
 def create_food_image(color, label):
     """Create a colored surface for a food piece with label"""
     # Create a surface for the food piece
@@ -330,7 +340,7 @@ def merge_piece(piece):
 
 def clear_lines():
     """Clear completed lines and update score"""
-    global score, level, lines_cleared
+    global score, level, lines_cleared, character_fullness, character_eating, character_last_eat_time, character_exploded
     lines = 0
     for i in range(GRID_HEIGHT):
         if all(grid[i]):
@@ -342,6 +352,11 @@ def clear_lines():
         lines_cleared += lines
         score += [0, 100, 300, 500, 800][lines] * level
         level = lines_cleared // 10 + 1
+        character_fullness += lines * 10  # Each row increases fullness
+        character_eating = True
+        character_last_eat_time = time.time()
+        if character_fullness >= character_max_fullness:
+            character_exploded = True
 
 def draw_grid():
     """Draw the game grid"""
@@ -554,9 +569,38 @@ def try_wall_kick(piece, new_rotation, grid):
     piece['rotation'] = original_rotation
     return False
 
+# Placeholder character drawing (semi-realistic bearded eater)
+def draw_character(fullness, exploded, eating):
+    base_y = GRID_HEIGHT * GRID_SIZE + 10
+    base_x = (SCREEN_WIDTH // 2) - 50
+    # Draw body (fullness = bigger belly)
+    belly_radius = 30 + int(30 * (fullness / character_max_fullness))
+    pygame.draw.ellipse(screen, (220, 180, 120), (base_x, base_y, 100, belly_radius))
+    # Draw head
+    pygame.draw.circle(screen, (200, 160, 100), (base_x + 50, base_y - 30), 30)
+    # Draw beard
+    pygame.draw.ellipse(screen, (90, 60, 30), (base_x + 20, base_y - 10, 60, 40))
+    # Draw cap
+    pygame.draw.ellipse(screen, (60, 60, 60), (base_x + 20, base_y - 55, 60, 25))
+    # Draw eyes
+    pygame.draw.circle(screen, (0, 0, 0), (base_x + 38, base_y - 35), 5)
+    pygame.draw.circle(screen, (0, 0, 0), (base_x + 62, base_y - 35), 5)
+    # Draw mouth (open if eating)
+    if eating:
+        pygame.draw.ellipse(screen, (0, 0, 0), (base_x + 40, base_y - 15, 20, 15))
+    else:
+        pygame.draw.line(screen, (0, 0, 0), (base_x + 40, base_y - 10), (base_x + 60, base_y - 10), 3)
+    # Draw explosion if exploded
+    if exploded:
+        for i in range(8):
+            angle = i * (3.14 / 4)
+            x1 = base_x + 50 + int(60 * (fullness / character_max_fullness) * 1.2 * pygame.math.Vector2(1, 0).rotate_rad(angle).x)
+            y1 = base_y - 10 + int(60 * (fullness / character_max_fullness) * 1.2 * pygame.math.Vector2(1, 0).rotate_rad(angle).y)
+            pygame.draw.line(screen, (255, 0, 0), (base_x + 50, base_y), (x1, y1), 6)
+
 def main():
     """Main game loop"""
-    global current_piece, next_pieces, score, level, lines_cleared, game_over, paused, grid, screen, food_images, pause_button_rect
+    global current_piece, next_pieces, score, level, lines_cleared, game_over, paused, grid, screen, food_images, pause_button_rect, character_exploded, character_eating
     
     # Initialize Pygame
     pygame.init()
@@ -707,8 +751,17 @@ def main():
         elif game_over:
             draw_game_over()
         
+        # Draw character
+        draw_character(character_fullness, character_exploded, character_eating)
+        
         pygame.display.flip()
         clock.tick(60)
+
+        # Update character eating state
+        if character_eating and time.time() - character_last_eat_time > character_eat_animation_time:
+            character_eating = False
+        if not character_exploded and time.time() - character_start_time > character_max_fullness:
+            character_exploded = True
 
 if __name__ == "__main__":
     try:
