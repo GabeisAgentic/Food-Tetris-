@@ -21,18 +21,41 @@ A fun twist on the classic Tetris game, where instead of traditional Tetris bloc
 
 ## Installation
 
-1. Make sure you have Python 3.x installed
+### Option 1: Using pip (Recommended)
+```bash
+pip install food-tetris
+```
+
+### Option 2: From Source
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/food-tetris.git
+   cd food-tetris
+   ```
+
 2. Install the required dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
+3. Install the game:
+   ```bash
+   pip install -e .
+   ```
+
 ## Running the Game
 
-Simply run the Python script:
-```bash
-python food_tetris.py
-```
+After installation, you can run the game in one of these ways:
+
+1. Using the command-line:
+   ```bash
+   food-tetris
+   ```
+
+2. Or by running the Python script directly:
+   ```bash
+   python food_tetris.py
+   ```
 
 ## Game Rules
 
@@ -48,4 +71,12 @@ python food_tetris.py
 - 3 lines cleared: 500 points × level
 - 4 lines cleared: 800 points × level
 
-Level up every 10 lines cleared! 
+Level up every 10 lines cleared!
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
