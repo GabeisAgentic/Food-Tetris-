@@ -12,4 +12,9 @@ venv311/
 
 # IDE
 .vscode/
-.idea/ 
+.idea/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/ 
