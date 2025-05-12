@@ -32,6 +32,12 @@ GRID_COLOR = (200, 200, 200)  # Lighter gray for grid lines
 GAME_BG = (255, 255, 255)  # White background for game area
 RED = (255, 0, 0)
 
+# Add these constants after the other color definitions
+PAUSE_BUTTON_COLOR = (100, 100, 100)  # Gray
+PAUSE_BUTTON_HOVER_COLOR = (150, 150, 150)  # Lighter gray
+PAUSE_BUTTON_SIZE = 40
+PAUSE_BUTTON_MARGIN = 20
+
 # Food-themed Tetrominoes
 FOODS = {
     'fries': {  # I shape - Classic long piece styled as french fries
@@ -813,6 +819,36 @@ def reset_game():
     character_eating = False
     character_start_time = time.time()
 
+def draw_pause_button():
+    """Draw the pause button in the top-right corner of the game area"""
+    # Calculate button position
+    button_x = GRID_WIDTH * GRID_SIZE - PAUSE_BUTTON_SIZE - PAUSE_BUTTON_MARGIN
+    button_y = PAUSE_BUTTON_MARGIN
+    
+    # Get mouse position
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+    
+    # Check if mouse is hovering over button
+    is_hovering = (button_x <= mouse_x <= button_x + PAUSE_BUTTON_SIZE and 
+                  button_y <= mouse_y <= button_y + PAUSE_BUTTON_SIZE)
+    
+    # Draw button background
+    button_color = PAUSE_BUTTON_HOVER_COLOR if is_hovering else PAUSE_BUTTON_COLOR
+    pygame.draw.rect(screen, button_color, 
+                    (button_x, button_y, PAUSE_BUTTON_SIZE, PAUSE_BUTTON_SIZE))
+    
+    # Draw pause icon (two vertical bars)
+    bar_width = 8
+    bar_height = 20
+    bar_spacing = 4
+    bar_x = button_x + (PAUSE_BUTTON_SIZE - (bar_width * 2 + bar_spacing)) // 2
+    bar_y = button_y + (PAUSE_BUTTON_SIZE - bar_height) // 2
+    
+    pygame.draw.rect(screen, WHITE, (bar_x, bar_y, bar_width, bar_height))
+    pygame.draw.rect(screen, WHITE, (bar_x + bar_width + bar_spacing, bar_y, bar_width, bar_height))
+    
+    return (button_x, button_y, PAUSE_BUTTON_SIZE, PAUSE_BUTTON_SIZE)
+
 def main():
     """Main game loop"""
     global current_piece, next_pieces, score, level, lines_cleared, game_over, paused, grid, screen, food_images, character_exploded, character_eating, held_piece, can_hold, play_again_button_rect
@@ -999,6 +1035,9 @@ def main():
             draw_ghost_piece(current_piece)
             draw_piece(current_piece)
         draw_sidebar()
+        
+        # Draw pause button and get its rect
+        pause_button_rect = draw_pause_button()
         
         if paused:
             draw_pause()
