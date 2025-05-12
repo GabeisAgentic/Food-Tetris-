@@ -2,6 +2,29 @@
 
 A fun twist on the classic Tetris game, where instead of traditional Tetris blocks, you'll be playing with food-themed pieces! Stack burgers, pizzas, fries, and more to clear lines and score points.
 
+## Quick Start Guide
+
+### Step 1: Install the Game
+Choose one of these methods:
+
+**Method A - From GitHub (Recommended):**
+```bash
+pip install git+https://github.com/GabeisAgentic/Food-Tetris-.git
+```
+
+**Method B - From PyPI:**
+```bash
+pip install food-tetris
+```
+
+### Step 2: Run the Game
+After installation, simply type:
+```bash
+food-tetris
+```
+
+That's it! The game should now start. If you encounter any issues, please check the Troubleshooting section below.
+
 ## Features
 
 - Food-themed Tetrominoes (Burger, Pizza, Fries, Sushi, Donut, Hotdog, Broccoli)
@@ -19,43 +42,16 @@ A fun twist on the classic Tetris game, where instead of traditional Tetris bloc
 - P: Pause/Resume game
 - R: Restart game
 
-## Installation
+## Troubleshooting
 
-### Option 1: Using pip (Recommended)
-```bash
-pip install food-tetris
-```
+If you encounter any issues:
 
-### Option 2: From Source
-1. Clone the repository:
+1. Make sure you have Python 3.6 or higher installed
+2. If you get a "command not found" error, try:
    ```bash
-   git clone https://github.com/yourusername/food-tetris.git
-   cd food-tetris
+   python -m food_tetris
    ```
-
-2. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Install the game:
-   ```bash
-   pip install -e .
-   ```
-
-## Running the Game
-
-After installation, you can run the game in one of these ways:
-
-1. Using the command-line:
-   ```bash
-   food-tetris
-   ```
-
-2. Or by running the Python script directly:
-   ```bash
-   python food_tetris.py
-   ```
+3. If you have any problems, please open an issue on GitHub
 
 ## Game Rules
 
